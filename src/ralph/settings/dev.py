@@ -59,3 +59,6 @@ if bool_from_env('RALPH_PROFILING'):
             'function': 'DataCenterAssetAdmin.changelist_view'
         },
     ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+ENABLE_EMAIL_NOTIFICATION = True

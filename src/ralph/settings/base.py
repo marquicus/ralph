@@ -103,6 +103,8 @@ INSTALLED_APPS = (
     'taggit',
     'taggit_serializer',
     'djmoney',
+    'django_media_fixtures',
+    'constance',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -129,6 +131,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'constance.context_processors.config',
             ],
             'loaders': [
                 ('django.template.loaders.cached.Loader', [
@@ -144,13 +147,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ralph.wsgi.application'
 
 DEFAULT_DATABASE_OPTIONS = {
-    'sql_mode': 'TRADITIONAL',
-    'charset': 'utf8',
-    'init_command': """
-    SET default_storage_engine=INNODB;
-    SET character_set_connection=utf8,collation_connection=utf8_unicode_ci;
-    SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
-    """
 }
 DATABASE_OPTIONS_FROM_ENV = os.environ.get('DATABASE_OPTIONS', None)
 DATABASE_OPTIONS = (
@@ -164,12 +160,12 @@ if DATABASE_SSL_CA:
 
 DATABASES = {
     'default': {
-        'ENGINE': os.environ.get('DATABASE_ENGINE', 'transaction_hooks.backends.mysql'),  # noqa
-        'NAME': os.environ.get('DATABASE_NAME', 'ralph_ng'),
-        'USER': os.environ.get('DATABASE_USER', 'ralph_ng'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'ralph_ng') or None,
+        'ENGINE': os.environ.get('DATABASE_ENGINE', 'transaction_hooks.backends.postgresql_psycopg2'),  # noqa
+        'NAME': os.environ.get('DATABASE_NAME', 'ralph'),
+        'USER': os.environ.get('DATABASE_USER', 'ralph'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'ralphp4sswd') or None,
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DATABASE_PORT', 3306),
+        'PORT': os.environ.get('DATABASE_PORT', 5432),
         'OPTIONS': DATABASE_OPTIONS,
         'ATOMIC_REQUESTS': True,
         'TEST': {
@@ -221,8 +217,9 @@ DEFAULT_COUNTRY_CODE = os.environ.get('DEFAULT_COUNTRY_CODE', 'POL')
 
 LDAP_SERVER_OBJECT_USER_CLASS = 'user'  # possible values: user, person
 
-ADMIN_SITE_HEADER = 'Ralph 3'
-ADMIN_SITE_TITLE = 'Ralph 3'
+ADMIN_SITE_HEADER = 'Ralph AMS'
+ADMIN_SITE_TITLE = 'Ralph AMS'
+SITE_NAME = 'Ralph Asset Management System'
 
 LOGGING = {
     'version': 1,
@@ -667,3 +664,39 @@ CURRENCY_CHOICES = [
     if c.code != DEFAULT_CURRENCY_CODE
 ]
 CURRENCY_CHOICES.append(('XXX', '---'))
+
+# Folder for django-media-fixtures
+MEDIA_FIXTURE_FOLDERNAME = '../../fixtures/media_fixtures'
+
+# Constance configurations, django-constance
+CONSTANCE_ADDITIONAL_FIELDS = {
+    'image_field': ['django.forms.ImageField', {}],
+    'bg_select': ['django.forms.fields.ChoiceField', {
+        'widget': 'django.forms.Select',
+        'choices': (
+            (None, "-----"),
+            ("bg01.jpg", "BG01"),
+            ("bg02.jpg", "BG02"),
+            ("bg03.jpg", "BG03"),
+            ("bg04.jpg", "BG04"),
+            ("bg05.jpg", "BG05"),
+            ("bg06.jpg", "BG06"),
+        )
+    }],
+}
+
+CONSTANCE_CONFIG = {
+    'LOGO_IMAGE': ('logo.png', 'Logo Image', 'image_field'),
+    'SITE_TITLE': (SITE_NAME, 'Website title'),
+    'SITE_DESCRIPTION': (f'Sistema de gestion para la {SITE_NAME}', 'Website description'),
+    'LOGIN_TITLE': (SITE_NAME, 'Login title'),
+    'LOGIN_BACKGROUND': ('bg01.jpg', 'Login Background', 'bg_select'),
+    'EMAIL_SERVICE': ('Email message service', 'Email message'),
+    'SMS_SERVICE': ('SMS message service', 'SMS message'),
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    '01. General Options': ('SITE_TITLE', 'LOGIN_TITLE', 'SITE_DESCRIPTION'),
+    '02. System Options': ('EMAIL_SERVICE', 'SMS_SERVICE'),
+    '03. Theme Options': ('LOGO_IMAGE', 'LOGIN_BACKGROUND'),
+}
